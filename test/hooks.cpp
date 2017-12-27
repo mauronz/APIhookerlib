@@ -3,7 +3,7 @@
 
 extern HANDLE mutex;
 
-VOID WINAPI before_hook_CreateFileA(
+VOID __stdcall before_hook_CreateFileA(
 	_In_     LPCSTR               lpFileName,
 	_In_     DWORD                 dwDesiredAccess,
 	_In_     DWORD                 dwShareMode,
@@ -18,7 +18,7 @@ VOID WINAPI before_hook_CreateFileA(
 	ReleaseMutex(mutex);
 }
 
-VOID WINAPI after_hook_CreateFileA(
+VOID __stdcall after_hook_CreateFileA(
 	_In_     LPCSTR               lpFileName,
 	_In_     DWORD                 dwDesiredAccess,
 	_In_     DWORD                 dwShareMode,
@@ -34,7 +34,7 @@ VOID WINAPI after_hook_CreateFileA(
 	ReleaseMutex(mutex);
 }
 
-VOID WINAPI before_hook_CreateFileW(
+VOID __stdcall before_hook_CreateFileW(
 	_In_     LPWSTR               lpFileName,
 	_In_     DWORD                 dwDesiredAccess,
 	_In_     DWORD                 dwShareMode,
@@ -49,7 +49,7 @@ VOID WINAPI before_hook_CreateFileW(
 	ReleaseMutex(mutex);
 }
 
-VOID WINAPI after_hook_CreateFileW(
+VOID __stdcall after_hook_CreateFileW(
 	_In_     LPWSTR               lpFileName,
 	_In_     DWORD                 dwDesiredAccess,
 	_In_     DWORD                 dwShareMode,
@@ -65,7 +65,7 @@ VOID WINAPI after_hook_CreateFileW(
 	ReleaseMutex(mutex);
 }
 
-VOID WINAPI before_hook_ReadFile(
+VOID __stdcall before_hook_ReadFile(
 	_In_        HANDLE       hFile,
 	_Out_       LPVOID       lpBuffer,
 	_In_        DWORD        nNumberOfBytesToRead,
@@ -78,7 +78,7 @@ VOID WINAPI before_hook_ReadFile(
 	ReleaseMutex(mutex);
 }
 
-VOID WINAPI after_hook_ReadFile(
+VOID __stdcall after_hook_ReadFile(
 	_In_        HANDLE       hFile,
 	_Out_       LPVOID       lpBuffer,
 	_In_        DWORD        nNumberOfBytesToRead,
@@ -92,7 +92,7 @@ VOID WINAPI after_hook_ReadFile(
 	ReleaseMutex(mutex);
 }
 
-VOID WINAPI before_hook_WriteFile(
+VOID __stdcall before_hook_WriteFile(
 	_In_        HANDLE       hFile,
 	_In_        LPCVOID      lpBuffer,
 	_In_        DWORD        nNumberOfBytesToWrite,
@@ -105,7 +105,7 @@ VOID WINAPI before_hook_WriteFile(
 	ReleaseMutex(mutex);
 }
 
-VOID WINAPI after_hook_WriteFile(
+VOID __stdcall after_hook_WriteFile(
 	_In_        HANDLE       hFile,
 	_In_        LPCVOID      lpBuffer,
 	_In_        DWORD        nNumberOfBytesToWrite,
@@ -119,7 +119,7 @@ VOID WINAPI after_hook_WriteFile(
 	ReleaseMutex(mutex);
 }
 
-VOID WINAPI before_hook_MoveFileA(
+VOID __stdcall before_hook_MoveFileA(
 	_In_ LPCSTR lpExistingFileName,
 	_In_ LPCSTR lpNewFileName
 ) {
@@ -129,7 +129,7 @@ VOID WINAPI before_hook_MoveFileA(
 	ReleaseMutex(mutex);
 }
 
-VOID WINAPI after_hook_MoveFileA(
+VOID __stdcall after_hook_MoveFileA(
 	_In_ LPCTSTR lpExistingFileName,
 	_In_ LPCTSTR lpNewFileName,
 	BOOL returnValue
@@ -140,7 +140,7 @@ VOID WINAPI after_hook_MoveFileA(
 	ReleaseMutex(mutex);
 }
 
-VOID WINAPI before_hook_MoveFileExA(
+VOID __stdcall before_hook_MoveFileExA(
 	_In_ LPCSTR lpExistingFileName,
 	_In_ LPCSTR lpNewFileName,
 	_In_     DWORD   dwFlags
@@ -151,7 +151,7 @@ VOID WINAPI before_hook_MoveFileExA(
 	ReleaseMutex(mutex);
 }
 
-VOID WINAPI after_hook_MoveFileExA(
+VOID __stdcall after_hook_MoveFileExA(
 	_In_ LPCTSTR lpExistingFileName,
 	_In_ LPCTSTR lpNewFileName,
 	_In_     DWORD   dwFlags,
