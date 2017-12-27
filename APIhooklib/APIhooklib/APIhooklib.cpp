@@ -5,16 +5,32 @@
 #include "hook_engine.h"
 #include "APIhooklib.h"
 
+typedef struct _api_hook {
+	LPVOID original;
+	LPVOID stub;
+	DWORD length;
+} api_hook;
+
 using namespace APIhooklib;
+std::map<std::string, std::map<std::string, api_hook>> hooks;
 
 FARPROC APIhooklib::set_hook(LPSTR dll_name, LPSTR func_name, DWORD n_args, FARPROC before_hook, FARPROC after_hook, BOOL do_call) {
-	LPVOID original = VirtualAlloc(NULL, 25, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+	LPVOID original;
 	DWORD length, size, offset, tmp;
 
 	BYTE head[] = "\x55\x89\xE5";  // push ebp; mov ebp, esp
 	BYTE push_param[] = "\x8B\x45X\x50";  // mov eax, [ebp+X]; push eax
 	BYTE call_func[] = "\xE8XXXX"; // call XXXX
 	BYTE end[] = "\x89\xEC\x5D\xC2XX"; // mov esp,ebp; pop ebp; ret XX
+
+	std::map<std::string, api_hook> *lib_hooks = &hooks[dll_name];
+	api_hook *hook = &(*lib_hooks)[func_name];
+	if (hook->original != NULL) {
+		printf("Hook already set for this function, aborting...\n");
+		return NULL;
+	}
+	
+	original = VirtualAlloc(NULL, 25, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
 
 	size = 3 + 6;
 	if (before_hook)
@@ -97,7 +113,23 @@ FARPROC APIhooklib::set_hook(LPSTR dll_name, LPSTR func_name, DWORD n_args, FARP
 
 	HookFunction(dll_name, func_name, stub, original, &length);
 
+	hook->original = original;
+	hook->stub = stub;
+	hook->length = length;
+
 	return (FARPROC)original;
+}
+
+BOOL APIhooklib::remove_hook(LPSTR dll_name, LPSTR func_name) {
+	std::map<std::string, api_hook> *lib_hooks = &hooks[dll_name];
+	api_hook *hook = &(*lib_hooks)[func_name];
+	if (hook->original == NULL) {
+		return FALSE;
+	}
+	UnhookFunction(dll_name, func_name, hook->original, hook->length);
+	VirtualFree(hook->original, 0, MEM_RELEASE);
+	VirtualFree(hook->stub, 0, MEM_RELEASE);
+	memset(hook, 0, sizeof(api_hook));
 }
 
 PBYTE APIhooklib::load_executable(LPSTR path) {
