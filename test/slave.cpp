@@ -10,11 +10,10 @@ int main() {
 	CloseHandle(hFile);
 
 	hFile = CreateFileA("file.txt", GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	BYTE buffer[1024];
+	PBYTE buffer[1024];
 	buffer[0] = 0;
 	ReadFile(hFile, buffer, 1024, &n, NULL);
-	buffer[n] = 0;
-	printf("Slave read \"%s\"\n", buffer);
+	printf("Slave read %s\n", buffer);
 	CloseHandle(hFile);
 
 	MoveFileExA("file.txt", "newfile.txt", 0);

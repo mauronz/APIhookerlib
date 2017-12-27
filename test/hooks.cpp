@@ -1,5 +1,4 @@
 #include "hooks.h"
-#include "APIhooklib.h"
 #include <stdio.h>
 
 extern HANDLE mutex;
@@ -100,7 +99,6 @@ VOID __stdcall before_hook_WriteFile(
 	_Out_opt_   LPDWORD      lpNumberOfBytesWritten,
 	_Inout_opt_ LPOVERLAPPED lpOverlapped
 ) {
-	if (hFile == GetStdHandle(STD_OUTPUT_HANDLE)) return;
 	WaitForSingleObject(mutex, INFINITE);
 	printf("---------\n");
 	printf("WriteFile: handle=0x%x, buffer=0x%08x, n_bytes=0x%x\n", hFile, lpBuffer, nNumberOfBytesToWrite);
@@ -115,12 +113,10 @@ VOID __stdcall after_hook_WriteFile(
 	_Inout_opt_ LPOVERLAPPED lpOverlapped,
 	BOOL returnValue
 ) {
-	if (hFile == GetStdHandle(STD_OUTPUT_HANDLE)) return;
 	WaitForSingleObject(mutex, INFINITE);
 	printf("Return value of WriteFile: 0x%x, bytes_written=0x%x\n", returnValue, *lpNumberOfBytesWritten);
 	printf("---------\n");
 	ReleaseMutex(mutex);
-	APIhooklib::remove_hook("kernel32.dll", "CreateFileA");
 }
 
 VOID __stdcall before_hook_MoveFileA(
