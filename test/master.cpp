@@ -7,8 +7,6 @@
 HANDLE mutex;
 
 int main(int argc, char **argv) {
-	//comment
-
 	LPSTR path = argv[1];
 	BYTE *loaded_pe = APIhooklib::load_executable(path);
 	if (!loaded_pe)
