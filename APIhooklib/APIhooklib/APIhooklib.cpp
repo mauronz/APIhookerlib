@@ -12,9 +12,9 @@ typedef struct _api_hook {
 	DWORD length;
 } api_hook;
 
-std::map<std::string, std::map<std::string, api_hook>> hooks;
+std::map<DWORD, api_hook> hooks;
 
-FARPROC APIhooklib::set_hook(LPSTR dll_name, LPSTR func_name, DWORD n_args, FARPROC before_hook, FARPROC after_hook, BOOL do_call) {
+FARPROC APIhooklib::set_hook(LPSTR dll_name, LPSTR func_name, DWORD n_args, FARPROC before_hook, FARPROC after_hook, BOOL do_call, BOOL override_ret) {
 	LPVOID original;
 	DWORD length, size, offset, tmp;
 
@@ -23,8 +23,8 @@ FARPROC APIhooklib::set_hook(LPSTR dll_name, LPSTR func_name, DWORD n_args, FARP
 	BYTE call_func[] = "\xE8XXXX"; // call XXXX
 	BYTE end[] = "\x89\xEC\x5D\xC2XX"; // mov esp,ebp; pop ebp; ret XX
 
-	std::map<std::string, api_hook> *lib_hooks = &hooks[dll_name];
-	api_hook *hook = &(*lib_hooks)[func_name];
+	DWORD addr = (DWORD)GetProcAddress(LoadLibraryA(dll_name), func_name);
+	api_hook *hook = &hooks[addr];
 	if (hook->original != NULL) {
 		printf("Hook already set for this function, aborting...\n");
 		return NULL;
@@ -38,7 +38,9 @@ FARPROC APIhooklib::set_hook(LPSTR dll_name, LPSTR func_name, DWORD n_args, FARP
 	if (do_call)
 		size += 4 * n_args + 5;
 	if (after_hook)
-		size += 4 * n_args + 5 + 1 + 2;
+		size += 4 * n_args + 5 + 1;
+	if (!override_ret)
+		size += 2;
 	offset = 0;
 	tmp = n_args * 4;
 	memcpy(end + 4, &tmp, 2);
@@ -83,8 +85,10 @@ FARPROC APIhooklib::set_hook(LPSTR dll_name, LPSTR func_name, DWORD n_args, FARP
 	
 	if (after_hook) {
 		// Push return value to save it for later (push eax)
-		stub[offset] = 0x50;
-		offset++;
+		if (!override_ret) {
+			stub[offset] = 0x50;
+			offset++;
+		}
 
 		// Push return value to pass it as parameter of after-hook
 		stub[offset] = 0x50;
@@ -104,8 +108,10 @@ FARPROC APIhooklib::set_hook(LPSTR dll_name, LPSTR func_name, DWORD n_args, FARP
 		offset += 5;
 
 		// Pop return value from stack (pop eax)
-		stub[offset] = 0x58;
-		offset++;
+		if (!override_ret) {
+			stub[offset] = 0x58;
+			offset++;
+		}
 	}
 
 	memcpy(stub + offset, end, 6);
@@ -121,8 +127,8 @@ FARPROC APIhooklib::set_hook(LPSTR dll_name, LPSTR func_name, DWORD n_args, FARP
 }
 
 BOOL APIhooklib::remove_hook(LPSTR dll_name, LPSTR func_name) {
-	std::map<std::string, api_hook> *lib_hooks = &hooks[dll_name];
-	api_hook *hook = &(*lib_hooks)[func_name];
+	DWORD addr = (DWORD)GetProcAddress(LoadLibraryA(dll_name), func_name);
+	api_hook *hook = &hooks[addr];
 	if (hook->original == NULL) {
 		return FALSE;
 	}

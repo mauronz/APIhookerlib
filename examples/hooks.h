@@ -99,3 +99,44 @@ VOID __stdcall after_hook_MoveFileExA(
 	_In_     DWORD   dwFlags,
 	BOOL returnValue
 );
+
+VOID __stdcall before_hook_socket(
+	int af,
+	int type,
+	int protocol
+);
+
+VOID __stdcall after_hook_socket(
+	int af,
+	int type,
+	int protocol,
+	SOCKET ret_value
+);
+
+VOID __stdcall before_hook_connect(
+	_In_ SOCKET                s,
+	_In_ const struct sockaddr *name,
+	_In_ int                   namelen
+);
+
+VOID __stdcall before_hook_send(
+	_In_       SOCKET s,
+	_In_ const char   *buf,
+	_In_       int    len,
+	_In_       int    flags
+);
+
+VOID __stdcall before_hook_recv(
+	_In_  SOCKET s,
+	_Out_ char   *buf,
+	_In_  int    len,
+	_In_  int    flags
+);
+
+int __stdcall after_hook_recv(
+	_In_  SOCKET s,
+	_Out_ char   *buf,
+	_In_  int    len,
+	_In_  int    flags,
+	int retvalue
+);
